@@ -1,12 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  AfterLoad,
-  AfterInsert,
-  AfterUpdate,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { DetailTransaksi } from '../detail-transaksi/detail-transaksi.entity';
 
 @Entity()
@@ -24,10 +16,10 @@ export class Menu {
   deskripsi?: string;
 
   @Column('varchar', { length: 256, nullable: true })
-  imageKey?: string;
+  image_key?: string;
 
   @Column('varchar', { length: 256, nullable: true })
-  imageSrc?: string;
+  image_src?: string;
 
   @Column('int')
   harga: number;

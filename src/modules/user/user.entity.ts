@@ -27,10 +27,10 @@ export class User {
   password: string;
 
   @Column('varchar', { length: 256, nullable: true })
-  avatarKey?: string;
+  avatar_key?: string;
 
   @Column('varchar', { length: 256, nullable: true })
-  avatarSrc?: string;
+  avatar_src?: string;
 
   @OneToMany(() => Transaksi, (Transaksi) => Transaksi.user)
   transaksi: Transaksi[];

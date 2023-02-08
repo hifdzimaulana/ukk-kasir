@@ -40,8 +40,8 @@ export class MenuService {
         'menu/' + uuidV4() + '.' + image.originalname.split('.').at(-1), // defines file extension
       );
 
-      menu.imageKey = uploadedFile.Key;
-      menu.imageSrc = uploadedFile.Location;
+      menu.image_key = uploadedFile.Key;
+      menu.image_src = uploadedFile.Location;
     }
 
     try {
@@ -56,13 +56,13 @@ export class MenuService {
       const menu = await this.menuRepo.findOneByOrFail({ id });
 
       if (image) {
-        await this.fileStorageService.uploadFile(image, menu.imageKey);
+        await this.fileStorageService.uploadFile(image, menu.image_key);
         if (Object.keys(payload).length == 0) {
           return { message: 'Successfully updated menu image' };
         }
       }
       await this.menuRepo.update(id, payload);
-      return { message: 'Successfully updated user' };
+      return { message: 'Successfully updated menu' };
     } catch (error) {
       if (error.code == 'TimeoutError') throw new RequestTimeoutException();
       throw new NotFoundException();
@@ -73,9 +73,9 @@ export class MenuService {
     try {
       const menu = await this.menuRepo.findOneByOrFail({ id });
 
-      if (menu.imageKey) {
+      if (menu.image_key) {
         const response = await this.fileStorageService.deleteFile(
-          menu.imageKey,
+          menu.image_key,
         );
         console.log(response);
       }
