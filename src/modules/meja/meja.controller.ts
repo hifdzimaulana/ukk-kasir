@@ -6,10 +6,8 @@ import {
   Param,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { CreateMejaDto, UpdateMejaDto } from './meja.dto';
-import { STATUS_MEJA } from './meja.entity';
 import { MejaService } from './meja.service';
 
 @Controller('meja')
@@ -17,8 +15,8 @@ export class MejaController {
   constructor(private readonly mejaService: MejaService) {}
 
   @Get()
-  findAll(@Query('status') status: STATUS_MEJA) {
-    return this.mejaService.findAll(status);
+  findAll() {
+    return this.mejaService.findAll();
   }
   @Get('/:id')
   findById(@Param('id') id: string) {
@@ -33,11 +31,6 @@ export class MejaController {
   @Patch('/:id')
   update(@Param('id') id: string, @Body() payload: UpdateMejaDto) {
     return this.mejaService.update(id, payload);
-  }
-
-  @Patch('/:id/toggle-status')
-  toggleStatus(@Param('id') id: string) {
-    return this.mejaService.toggleStatus(id);
   }
 
   @Delete('/:id')
