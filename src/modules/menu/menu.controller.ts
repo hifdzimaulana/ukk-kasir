@@ -10,6 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PublicRoute } from '../auth/public-route.decorator';
 import { CreateMenuDto, UpdateMenuDto } from './menu.dto';
 import { MenuService } from './menu.service';
 
@@ -17,11 +18,13 @@ import { MenuService } from './menu.service';
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
+  @PublicRoute()
   @Get()
   findAll() {
     return this.menuService.findAll();
   }
 
+  @PublicRoute()
   @Get('/:id')
   findById(@Param('id') id: string) {
     return this.menuService.findById(id);

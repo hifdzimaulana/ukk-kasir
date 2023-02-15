@@ -12,9 +12,11 @@ import { User } from './modules/user/user.entity';
 import { Transaksi } from './modules/transaksi/transaksi.entity';
 import { DetailTransaksiModule } from './modules/detail-transaksi/detail-transaksi.module';
 import { DetailTransaksi } from './modules/detail-transaksi/detail-transaksi.entity';
-import { FileStorageService } from './utils/file-storage.service';
+import { FileStorageService } from './modules/file-storage/file-storage.service';
 import { ConfigModule } from '@nestjs/config';
-import { UtilsModule } from './utils/utils.module';
+import { FileStorageModule } from './modules/file-storage/file-storage.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CaslModule } from './modules/casl/casl.module';
 
 @Module({
   imports: [
@@ -37,7 +39,9 @@ import { UtilsModule } from './utils/utils.module';
     TransaksiModule,
     UserModule,
     DetailTransaksiModule,
-    UtilsModule,
+    FileStorageModule,
+    AuthModule,
+    CaslModule,
   ],
   controllers: [AppController],
   providers: [AppService, FileStorageService],
