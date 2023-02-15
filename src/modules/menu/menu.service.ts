@@ -4,12 +4,13 @@ import {
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FileStorageService } from 'src/utils/file-storage.service';
+import { FileStorageService } from 'src/modules/file-storage/file-storage.service';
 import { EntityNotFoundError, Repository } from 'typeorm';
 import { CreateMenuDto, UpdateMenuDto } from './menu.dto';
 import { Menu } from './menu.entity';
 
 import { v4 as uuidV4 } from 'uuid';
+import { extname } from 'path';
 
 @Injectable()
 export class MenuService {
@@ -37,7 +38,7 @@ export class MenuService {
     if (image) {
       const uploadedFile = await this.fileStorageService.uploadFile(
         image,
-        'menu/' + uuidV4() + '.' + image.originalname.split('.').at(-1), // defines file extension
+        `menu/${uuidV4()}${extname(image.originalname)}`,
       );
 
       menu.image_key = uploadedFile.Key;

@@ -5,12 +5,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hashSync } from 'bcrypt';
-import { FileStorageService } from 'src/utils/file-storage.service';
+import { FileStorageService } from 'src/modules/file-storage/file-storage.service';
 import { EntityNotFoundError, Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { User } from './user.entity';
 
 import { v4 as uuidV4 } from 'uuid';
+import { extname } from 'path';
 
 @Injectable()
 export class UserService {
@@ -32,6 +33,10 @@ export class UserService {
     }
   }
 
+  async findByUsername(username: string) {
+    return await this.userRepo.findOneBy({ username });
+  }
+
   async store(payload: CreateUserDto, avatar: Express.Multer.File) {
     const user = this.userRepo.create(payload);
     user.password = hashSync(user.password, 10);
@@ -39,7 +44,7 @@ export class UserService {
     if (avatar) {
       const uploadedFile = await this.fileStorageService.uploadFile(
         avatar,
-        'avatar/' + uuidV4() + '.' + avatar.originalname.split('.').at(-1), // defines file extension
+        `avatar/${uuidV4()}${extname(avatar.originalname)}`,
       );
 
       user.avatar_key = uploadedFile.Key;
