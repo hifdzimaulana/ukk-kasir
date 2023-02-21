@@ -42,7 +42,7 @@ export const lambdaMatcher: ConditionsMatcher<MatchConditions> = (
 ) => matchConditions;
 
 @Injectable()
-export class CaslAbiltyFactory {
+export class CaslAbilityFactory {
   createForUser(user: User) {
     const { can, build } = new AbilityBuilder<AppAbility>(
       PureAbility as AbilityClass<AppAbility>,

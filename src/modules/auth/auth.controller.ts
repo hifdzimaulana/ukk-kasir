@@ -1,6 +1,4 @@
-import { Controller, Post, Get, Request, UseGuards } from '@nestjs/common';
-import { Actions, CaslAbiltyFactory } from '../casl/casl-abilty.factory';
-import { AuthRequestType } from './auth-request.type';
+import { Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 

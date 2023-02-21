@@ -2,16 +2,14 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
-import { CaslAbiltyFactory } from '../casl/casl-abilty.factory';
-import { User } from '../user/user.entity';
-import { AuthRequestType } from './auth-request.type';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { IS_PUBLIC_KEY } from './public-route.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt-strategy') {
   constructor(
     private reflector: Reflector,
-    private caslAbilityFactory: CaslAbiltyFactory,
+    private caslAbilityFactory: CaslAbilityFactory,
   ) {
     super();
   }
