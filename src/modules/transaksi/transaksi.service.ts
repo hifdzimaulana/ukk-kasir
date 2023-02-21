@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { DetailTransaksi } from '../detail-transaksi/detail-transaksi.entity';
@@ -27,18 +27,15 @@ export class TransaksiService {
 
     try {
       const user = await queryRunner.manager.findOneByOrFail(User, {
-        // 1
         id: 'b515effb-dd2f-44af-a8bc-5e0d51209688',
       });
 
       const meja = await queryRunner.manager.findOneByOrFail(Meja, {
-        // 2
         nomor_meja: body.nomor_meja,
       });
 
       let grandTotal = 0;
       const transaksi = await queryRunner.manager.save(Transaksi, {
-        // 3
         meja,
         nama_pelanggan: body.nama_pelanggan,
         user,
@@ -53,7 +50,6 @@ export class TransaksiService {
         delete val.id_menu;
         grandTotal += menus[i].harga * val.qty;
         return await queryRunner.manager.save(DetailTransaksi, {
-          // 5**
           menu: menus[i],
           transaksi,
           qty: val.qty,
@@ -63,7 +59,6 @@ export class TransaksiService {
       });
 
       await queryRunner.manager.update(Transaksi, transaksi.id, {
-        // 6
         total: grandTotal,
       });
 
