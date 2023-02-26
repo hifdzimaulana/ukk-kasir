@@ -46,7 +46,7 @@ export class TransaksiService {
       const menuIds = body.payload.map((val) => val.id_menu);
       const menus = await queryRunner.manager.findBy(Menu, { id: In(menuIds) }); // 4
 
-      let detailTransaksi = body.payload.map(async (val, i) => {
+      const detailTransaksi = body.payload.map(async (val, i) => {
         delete val.id_menu;
         grandTotal += menus[i].harga * val.qty;
         return await queryRunner.manager.save(DetailTransaksi, {

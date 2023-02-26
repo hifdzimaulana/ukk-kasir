@@ -3,5 +3,7 @@ import { DetailTransaksiService } from './detail-transaksi.service';
 
 @Controller('detail-transaksi')
 export class DetailTransaksiController {
-  constructor(private readonly detailTransaksiService: DetailTransaksiService) {}
+  constructor(
+    private readonly detailTransaksiService: DetailTransaksiService,
+  ) {}
 }

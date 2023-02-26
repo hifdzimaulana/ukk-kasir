@@ -4,7 +4,6 @@ import {
   IsArray,
   IsEnum,
   IsNotEmpty,
-  IsNotEmptyObject,
   IsNumberString,
   IsOptional,
   IsString,

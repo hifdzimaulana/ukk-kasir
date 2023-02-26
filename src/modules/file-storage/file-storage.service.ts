@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AWSError, S3 } from 'aws-sdk';
+import { S3 } from 'aws-sdk';
 import { DeleteObjectOutput, ManagedUpload } from 'aws-sdk/clients/s3';
 
 @Injectable()
@@ -36,7 +36,7 @@ export class FileStorageService {
     console.log(params);
 
     try {
-      let response = await this.s3.upload(params).promise();
+      const response = await this.s3.upload(params).promise();
       console.log(response);
       return response;
     } catch (error) {
