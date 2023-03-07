@@ -1,7 +1,19 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CheckPolicies } from '../auth/policy.decorator';
 import { Actions, AppAbility } from '../casl/casl-ability.factory';
-import { CreateTransaksiDto } from './transaksi.dto';
+import {
+  CreateTransaksiDto,
+  GetAllTransaksiQuery,
+  UpdateStatusTransaksiDto,
+} from './transaksi.dto';
 import { Transaksi } from './transaksi.entity';
 import { TransaksiService } from './transaksi.service';
 
@@ -11,8 +23,14 @@ export class TransaksiController {
 
   @Get()
   @CheckPolicies((ability: AppAbility) => ability.can(Actions.Read, Transaksi))
-  findAll() {
-    return this.transaksiService.findAll();
+  findAll(@Query() queries: GetAllTransaksiQuery) {
+    return this.transaksiService.findAll(queries);
+  }
+
+  @Get(':id')
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Read, Transaksi))
+  findById(@Param('id') id: string) {
+    return this.transaksiService.findById(id);
   }
 
   @Post()
@@ -21,5 +39,14 @@ export class TransaksiController {
   )
   store(@Body() body: CreateTransaksiDto) {
     return this.transaksiService.store(body);
+  }
+
+  @Patch('edit-status/:id')
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Update, Transaksi))
+  updateStatus(
+    @Body() body: UpdateStatusTransaksiDto,
+    @Param('id') id: string,
+  ) {
+    return this.transaksiService.updateStatus(id, body.status);
   }
 }

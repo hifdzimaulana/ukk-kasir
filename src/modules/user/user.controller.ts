@@ -13,7 +13,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CheckPolicies } from '../auth/policy.decorator';
+import { Actions, AppAbility } from '../casl/casl-ability.factory';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
+import { User } from './user.entity';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -22,16 +25,19 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Read, User))
   findAll() {
     return this.userService.findAll();
   }
 
   @Get('/:id')
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Read, User))
   findById(@Param('id') id: string) {
     return this.userService.findById(id);
   }
 
   @Post()
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Create, User))
   @UseInterceptors(FileInterceptor('avatar'))
   store(
     @UploadedFile() avatar: Express.Multer.File,
@@ -41,6 +47,7 @@ export class UserController {
   }
 
   @Patch('/:id')
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Update, User))
   @UseInterceptors(FileInterceptor('avatar'))
   update(
     @Param('id') id: string,
@@ -51,6 +58,7 @@ export class UserController {
   }
 
   @Delete('/:id')
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Delete, User))
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }

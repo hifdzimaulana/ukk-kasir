@@ -1,12 +1,13 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -33,4 +34,23 @@ export class CreateTransaksiDto {
   payload: CreateDetailTransaksiDto[];
 }
 
-export class UpdateTransaksiDto extends PartialType(CreateTransaksiDto) {}
+export class UpdateStatusTransaksiDto {
+  @IsEnum(STATUS_TRANSAKSI)
+  @IsNotEmpty()
+  status: STATUS_TRANSAKSI;
+}
+
+export class GetAllTransaksiQuery {
+  @IsEnum(STATUS_TRANSAKSI)
+  @IsOptional()
+  status?: STATUS_TRANSAKSI;
+  @IsDateString()
+  @IsOptional()
+  after?: string;
+  @IsDateString()
+  @IsOptional()
+  before?: string;
+  @IsUUID()
+  @IsOptional()
+  userId?: string;
+}
