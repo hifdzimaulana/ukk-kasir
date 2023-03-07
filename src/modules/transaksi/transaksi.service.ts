@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
+import { AuthRequestType } from '../auth/auth-request.type';
 import { DetailTransaksi } from '../detail-transaksi/detail-transaksi.entity';
 import { Meja } from '../meja/meja.entity';
 import { Menu } from '../menu/menu.entity';
-import { User } from '../user/user.entity';
-import { CreateTransaksiDto } from './transaksi.dto';
-import { Transaksi } from './transaksi.entity';
+import { USER_ROLES } from '../user/user.entity';
+import { CreateTransaksiDto, GetAllTransaksiQuery } from './transaksi.dto';
+import { STATUS_TRANSAKSI, Transaksi } from './transaksi.entity';
 
 @Injectable()
 export class TransaksiService {
@@ -14,10 +16,49 @@ export class TransaksiService {
     @InjectRepository(Transaksi)
     private transaksiRepo: Repository<Transaksi>,
     private dataSource: DataSource,
+    @Inject(REQUEST) private request: AuthRequestType,
   ) {}
 
-  async findAll() {
-    return await this.transaksiRepo.find({ relations: ['detailTransaksi'] });
+  async findAll(queries: GetAllTransaksiQuery) {
+    const query = this.transaksiRepo
+      .createQueryBuilder('transaksi')
+      .leftJoinAndSelect('transaksi.detailTransaksi', 'detailTransaksi')
+      .leftJoinAndSelect('detailTransaksi.menu', 'menu');
+
+    if (queries.after)
+      query.andWhere('transaksi.tanggal >= :after', { after: queries.after });
+    if (queries.before)
+      query.andWhere('transaksi.tanggal < :before', { before: queries.before });
+    if (queries.status)
+      query.andWhere('transaksi.status = :status', { status: queries.status });
+
+    if (this.request.user.role == USER_ROLES.KASIR) {
+      query.andWhere('transaksi.user.id = :userId', {
+        userId: this.request.user.id,
+      });
+      return await query.getMany();
+    }
+
+    if (queries.userId)
+      query.andWhere('transaksi.user.id = :userId', { userId: queries.userId });
+
+    return await query.getMany();
+  }
+
+  async findById(id: string) {
+    const query = this.transaksiRepo
+      .createQueryBuilder('transaksi')
+      .leftJoinAndSelect('transaksi.detailTransaksi', 'detailTransaksi')
+      .leftJoinAndSelect('detailTransaksi.menu', 'menu')
+      .where('transaksi.id = :id', { id });
+
+    if (this.request.user.role == USER_ROLES.KASIR) {
+      query.andWhere('transaksi.user.id = :userId', {
+        userId: this.request.user.id,
+      });
+    }
+
+    return await query.getOneOrFail();
   }
 
   async store(body: CreateTransaksiDto) {
@@ -26,9 +67,7 @@ export class TransaksiService {
     await queryRunner.startTransaction();
 
     try {
-      const user = await queryRunner.manager.findOneByOrFail(User, {
-        id: 'b515effb-dd2f-44af-a8bc-5e0d51209688',
-      });
+      const { ability, ...user } = this.request.user;
 
       const meja = await queryRunner.manager.findOneByOrFail(Meja, {
         nomor_meja: body.nomor_meja,
@@ -44,9 +83,9 @@ export class TransaksiService {
       });
 
       const menuIds = body.payload.map((val) => val.id_menu);
-      const menus = await queryRunner.manager.findBy(Menu, { id: In(menuIds) }); // 4
+      const menus = await queryRunner.manager.findBy(Menu, { id: In(menuIds) });
 
-      const detailTransaksi = body.payload.map(async (val, i) => {
+      body.payload.map(async (val, i) => {
         delete val.id_menu;
         grandTotal += menus[i].harga * val.qty;
         return await queryRunner.manager.save(DetailTransaksi, {
@@ -63,13 +102,23 @@ export class TransaksiService {
       });
 
       await queryRunner.commitTransaction();
-
-      return detailTransaksi;
+      return { message: 'Sukses membuat transaksi' };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.log(error);
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async updateStatus(id: string, status: STATUS_TRANSAKSI) {
+    return (
+      await this.transaksiRepo.update(id, {
+        status,
+        user: { id: this.request.user.id },
+      })
+    ).affected
+      ? { message: 'Successfully updated status transaksi' }
+      : new NotFoundException();
   }
 }
