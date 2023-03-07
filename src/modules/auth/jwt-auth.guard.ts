@@ -1,4 +1,8 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
@@ -35,6 +39,7 @@ export class JwtAuthGuard extends AuthGuard('jwt-strategy') {
     info: any,
     context: ExecutionContext,
   ): TUser {
+    if (!user) throw new UnauthorizedException();
     user.ability = this.caslAbilityFactory.createForUser(user);
     return user;
   }
