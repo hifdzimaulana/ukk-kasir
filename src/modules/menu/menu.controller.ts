@@ -10,8 +10,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CheckPolicies } from '../auth/policy.decorator';
 import { PublicRoute } from '../auth/public-route.decorator';
+import { Actions, AppAbility } from '../casl/casl-ability.factory';
 import { CreateMenuDto, UpdateMenuDto } from './menu.dto';
+import { Menu } from './menu.entity';
 import { MenuService } from './menu.service';
 
 @Controller('menu')
@@ -31,6 +34,7 @@ export class MenuController {
   }
 
   @Post()
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Create, Menu))
   @UseInterceptors(FileInterceptor('image'))
   store(
     @UploadedFile() image: Express.Multer.File,
@@ -40,6 +44,7 @@ export class MenuController {
   }
 
   @Patch('/:id')
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Update, Menu))
   @UseInterceptors(FileInterceptor('image'))
   update(
     @Param('id') id: string,
@@ -50,6 +55,7 @@ export class MenuController {
   }
 
   @Delete('/:id')
+  @CheckPolicies((a: AppAbility) => a.can(Actions.Delete, Menu))
   remove(@Param('id') id: string) {
     return this.menuService.remove(id);
   }

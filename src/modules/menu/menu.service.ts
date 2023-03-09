@@ -81,7 +81,9 @@ export class MenuService {
         console.log(response);
       }
 
-      return await this.menuRepo.delete(id);
+      return (await this.menuRepo.delete(id)).affected
+        ? { message: 'Successfully deleted menu' }
+        : new NotFoundException();
     } catch (error) {
       throw new NotFoundException();
     }
