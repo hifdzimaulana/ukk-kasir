@@ -12,6 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateDetailTransaksiDto } from '../detail-transaksi/detail-transaksi.dto';
+import { STATUS_MEJA } from '../meja/meja.entity';
 import { STATUS_TRANSAKSI } from './transaksi.entity';
 
 export class CreateTransaksiDto {
@@ -37,7 +38,11 @@ export class CreateTransaksiDto {
 export class UpdateStatusTransaksiDto {
   @IsEnum(STATUS_TRANSAKSI)
   @IsNotEmpty()
-  status: STATUS_TRANSAKSI;
+  status_transaksi: STATUS_TRANSAKSI;
+
+  @IsEnum(STATUS_MEJA)
+  @IsOptional()
+  status_meja: STATUS_MEJA;
 }
 
 export class GetAllTransaksiQuery {

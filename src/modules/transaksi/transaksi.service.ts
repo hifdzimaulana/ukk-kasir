@@ -7,7 +7,11 @@ import { DetailTransaksi } from '../detail-transaksi/detail-transaksi.entity';
 import { Meja, STATUS_MEJA } from '../meja/meja.entity';
 import { Menu } from '../menu/menu.entity';
 import { USER_ROLES } from '../user/user.entity';
-import { CreateTransaksiDto, GetAllTransaksiQuery } from './transaksi.dto';
+import {
+  CreateTransaksiDto,
+  GetAllTransaksiQuery,
+  UpdateStatusTransaksiDto,
+} from './transaksi.dto';
 import { STATUS_TRANSAKSI, Transaksi } from './transaksi.entity';
 
 @Injectable()
@@ -121,7 +125,7 @@ export class TransaksiService {
     }
   }
 
-  async updateStatus(id: string, status: STATUS_TRANSAKSI) {
+  async updateStatus(id: string, body: UpdateStatusTransaksiDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -130,12 +134,18 @@ export class TransaksiService {
         where: { id },
         relations: ['meja'],
       });
-      if (status == STATUS_TRANSAKSI.LUNAS)
+
+      if (body.status_meja) {
+        await queryRunner.manager.update(Meja, transaksi.meja.id, {
+          status: body.status_meja,
+        });
+      } else if (body.status_transaksi == STATUS_TRANSAKSI.LUNAS) {
         await queryRunner.manager.update(Meja, transaksi.meja.id, {
           status: STATUS_MEJA.KOSONG,
         });
+      }
 
-      transaksi.status = status;
+      transaksi.status = body.status_transaksi;
       await queryRunner.manager.save(transaksi);
 
       await queryRunner.commitTransaction();

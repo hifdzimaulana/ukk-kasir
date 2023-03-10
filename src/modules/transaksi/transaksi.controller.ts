@@ -47,6 +47,6 @@ export class TransaksiController {
     @Body() body: UpdateStatusTransaksiDto,
     @Param('id') id: string,
   ) {
-    return this.transaksiService.updateStatus(id, body.status);
+    return this.transaksiService.updateStatus(id, body);
   }
 }
