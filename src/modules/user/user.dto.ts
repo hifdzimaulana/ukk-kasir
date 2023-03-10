@@ -6,6 +6,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { IsFile } from '../file-storage/file-option.decorator';
 import { USER_ROLES } from './user.entity';
 
 export class CreateUserDto {
@@ -27,6 +28,10 @@ export class CreateUserDto {
   password: string;
 
   @IsOptional()
+  @IsFile(
+    { mime: ['image/jpeg', 'image/jpg', 'image/png'] },
+    { message: 'Jenis file tidak disupport' },
+  )
   avatar?: any;
 }
 
