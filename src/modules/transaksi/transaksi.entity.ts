@@ -31,7 +31,7 @@ export class Transaksi {
 
   @Column('enum', {
     enum: STATUS_TRANSAKSI,
-    default: STATUS_TRANSAKSI.LUNAS,
+    default: STATUS_TRANSAKSI.BELUM_BAYAR,
   })
   status: STATUS_TRANSAKSI;
 

@@ -1,10 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { AuthRequestType } from '../auth/auth-request.type';
 import { DetailTransaksi } from '../detail-transaksi/detail-transaksi.entity';
-import { Meja } from '../meja/meja.entity';
+import { Meja, STATUS_MEJA } from '../meja/meja.entity';
 import { Menu } from '../menu/menu.entity';
 import { USER_ROLES } from '../user/user.entity';
 import { CreateTransaksiDto, GetAllTransaksiQuery } from './transaksi.dto';
@@ -73,6 +73,16 @@ export class TransaksiService {
         nomor_meja: body.nomor_meja,
       });
 
+      if (meja.status == STATUS_MEJA.TERISI)
+        throw new HttpException(
+          `Meja ${meja.nomor_meja} sedang tidak tersedia`,
+          303,
+        );
+
+      await queryRunner.manager.update(Meja, meja.id, {
+        status: STATUS_MEJA.TERISI,
+      });
+
       let grandTotal = 0;
       const transaksi = await queryRunner.manager.save(Transaksi, {
         meja,
@@ -112,13 +122,31 @@ export class TransaksiService {
   }
 
   async updateStatus(id: string, status: STATUS_TRANSAKSI) {
-    return (
-      await this.transaksiRepo.update(id, {
-        status,
-        user: { id: this.request.user.id },
-      })
-    ).affected
-      ? { message: 'Successfully updated status transaksi' }
-      : new NotFoundException();
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const transaksi = await queryRunner.manager.findOneOrFail(Transaksi, {
+        where: { id },
+        relations: ['meja'],
+      });
+      if (status == STATUS_TRANSAKSI.LUNAS)
+        await queryRunner.manager.update(Meja, transaksi.meja.id, {
+          status: STATUS_MEJA.KOSONG,
+        });
+
+      transaksi.status = status;
+      await queryRunner.manager.save(transaksi);
+
+      await queryRunner.commitTransaction();
+
+      return { message: 'Successfully updated status transaksi' };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.log(error);
+      throw new HttpException(error, 500);
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
