@@ -61,6 +61,7 @@ export class CaslAbilityFactory {
         can(Actions.Read, Transaksi, {
           user: { id: user.id },
         });
+        can(Actions.Read, [Meja, Menu]);
         can(Actions.Update, Transaksi, ['status']);
         break;
     }
