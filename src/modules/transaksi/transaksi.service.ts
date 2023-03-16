@@ -1,7 +1,12 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, EntityNotFoundError, In, Repository } from 'typeorm';
 import { AuthRequestType } from '../auth/auth-request.type';
 import { DetailTransaksi } from '../detail-transaksi/detail-transaksi.entity';
 import { Meja, STATUS_MEJA } from '../meja/meja.entity';
@@ -26,8 +31,14 @@ export class TransaksiService {
   async findAll(queries: GetAllTransaksiQuery) {
     const query = this.transaksiRepo
       .createQueryBuilder('transaksi')
-      .leftJoinAndSelect('transaksi.detailTransaksi', 'detailTransaksi')
-      .leftJoinAndSelect('detailTransaksi.menu', 'menu');
+      .leftJoinAndSelect('transaksi.detailTransaksi', 'detailTransaksi');
+
+    if (queries.getMeja != null)
+      query.leftJoinAndSelect('transaksi.meja', 'meja');
+    if (queries.getUser != null)
+      query.leftJoinAndSelect('transaksi.user', 'user');
+    if (queries.getMenu != null)
+      query.leftJoinAndSelect('detailTransaksi.menu', 'menu');
 
     if (queries.after)
       query.andWhere('transaksi.tanggal >= :after', { after: queries.after });
@@ -49,20 +60,29 @@ export class TransaksiService {
     return await query.getMany();
   }
 
-  async findById(id: string) {
-    const query = this.transaksiRepo
-      .createQueryBuilder('transaksi')
-      .leftJoinAndSelect('transaksi.detailTransaksi', 'detailTransaksi')
-      .leftJoinAndSelect('detailTransaksi.menu', 'menu')
-      .where('transaksi.id = :id', { id });
+  async findById(id: string, queries) {
+    try {
+      const query = this.transaksiRepo
+        .createQueryBuilder('transaksi')
+        .leftJoinAndSelect('transaksi.detailTransaksi', 'detailTransaksi')
+        .where('transaksi.id = :id', { id });
+      if (queries.getMeja != null)
+        query.leftJoinAndSelect('transaksi.meja', 'meja');
+      if (queries.getUser != null)
+        query.leftJoinAndSelect('transaksi.user', 'user');
+      if (queries.getMenu != null)
+        query.leftJoinAndSelect('detailTransaksi.menu', 'menu');
 
-    if (this.request.user.role == USER_ROLES.KASIR) {
-      query.andWhere('transaksi.user.id = :userId', {
-        userId: this.request.user.id,
-      });
+      if (this.request.user.role == USER_ROLES.KASIR) {
+        query.andWhere('transaksi.user.id = :userId', {
+          userId: this.request.user.id,
+        });
+      }
+
+      return await query.getOneOrFail();
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) throw new NotFoundException();
     }
-
-    return await query.getOneOrFail();
   }
 
   async store(body: CreateTransaksiDto) {

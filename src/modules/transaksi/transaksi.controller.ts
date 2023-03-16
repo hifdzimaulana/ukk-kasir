@@ -29,8 +29,8 @@ export class TransaksiController {
 
   @Get(':id')
   @CheckPolicies((a: AppAbility) => a.can(Actions.Read, Transaksi))
-  findById(@Param('id') id: string) {
-    return this.transaksiService.findById(id);
+  findById(@Param('id') id: string, @Query() queries) {
+    return this.transaksiService.findById(id, queries);
   }
 
   @Post()

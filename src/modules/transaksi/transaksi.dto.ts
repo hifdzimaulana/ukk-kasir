@@ -46,15 +46,25 @@ export class UpdateStatusTransaksiDto {
 }
 
 export class GetAllTransaksiQuery {
+  @IsOptional()
+  getMeja?: any;
+  @IsOptional()
+  getUser?: any;
+  @IsOptional()
+  getMenu?: any;
+
   @IsEnum(STATUS_TRANSAKSI)
   @IsOptional()
   status?: STATUS_TRANSAKSI;
+
   @IsDateString()
   @IsOptional()
   after?: string;
+
   @IsDateString()
   @IsOptional()
   before?: string;
+
   @IsUUID()
   @IsOptional()
   userId?: string;
