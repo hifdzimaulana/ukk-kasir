@@ -1,15 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityNotFoundError, Repository } from 'typeorm';
-import { CreateMejaDto, UpdateMejaDto } from './meja.dto';
+import { CreateMejaDto, MejaQuery, UpdateMejaDto } from './meja.dto';
 import { Meja } from './meja.entity';
 
 @Injectable()
 export class MejaService {
   constructor(@InjectRepository(Meja) private mejaRepo: Repository<Meja>) {}
 
-  async findAll() {
-    return await this.mejaRepo.find();
+  async findAll(queries: MejaQuery) {
+    const query = this.mejaRepo.createQueryBuilder('meja');
+
+    if (queries.status)
+      query.where('meja.status = :status', { status: queries.status });
+
+    return await query.getMany();
   }
 
   async findById(id: string) {

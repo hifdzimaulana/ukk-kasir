@@ -6,10 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CheckPolicies } from '../auth/policy.decorator';
 import { Actions, AppAbility } from '../casl/casl-ability.factory';
-import { CreateMejaDto, UpdateMejaDto } from './meja.dto';
+import { CreateMejaDto, MejaQuery, UpdateMejaDto } from './meja.dto';
 import { Meja } from './meja.entity';
 import { MejaService } from './meja.service';
 
@@ -19,8 +20,8 @@ export class MejaController {
 
   @Get()
   @CheckPolicies((a: AppAbility) => a.can(Actions.Read, Meja))
-  findAll() {
-    return this.mejaService.findAll();
+  findAll(@Query() query: MejaQuery) {
+    return this.mejaService.findAll(query);
   }
   @Get('/:id')
   @CheckPolicies((a: AppAbility) => a.can(Actions.Read, Meja))

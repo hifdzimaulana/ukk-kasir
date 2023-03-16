@@ -20,3 +20,9 @@ export class CreateMejaDto {
 }
 
 export class UpdateMejaDto extends PartialType(CreateMejaDto) {}
+
+export class MejaQuery {
+  @IsEnum(STATUS_MEJA)
+  @IsOptional()
+  status?: STATUS_MEJA;
+}
