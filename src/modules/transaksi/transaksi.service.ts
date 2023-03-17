@@ -6,7 +6,13 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityNotFoundError, In, Repository } from 'typeorm';
+import {
+  DataSource,
+  EntityNotFoundError,
+  In,
+  CannotDetermineEntityError,
+  Repository,
+} from 'typeorm';
 import { AuthRequestType } from '../auth/auth-request.type';
 import { DetailTransaksi } from '../detail-transaksi/detail-transaksi.entity';
 import { Meja, STATUS_MEJA } from '../meja/meja.entity';
@@ -97,12 +103,7 @@ export class TransaksiService {
         nomor_meja: body.nomor_meja,
       });
 
-      if (meja.status == STATUS_MEJA.TERISI)
-        throw new HttpException(
-          `Meja ${meja.nomor_meja} sedang tidak tersedia`,
-          303,
-        );
-
+      if (meja.status == STATUS_MEJA.TERISI) throw new Error('MejaUnavailable');
       await queryRunner.manager.update(Meja, meja.id, {
         status: STATUS_MEJA.TERISI,
       });
@@ -138,6 +139,8 @@ export class TransaksiService {
       await queryRunner.commitTransaction();
       return { message: 'Sukses membuat transaksi' };
     } catch (error) {
+      if (error.message == 'MejaUnavailable')
+        throw new HttpException('Meja sudah terisi', 303);
       await queryRunner.rollbackTransaction();
       console.log(error);
     } finally {
